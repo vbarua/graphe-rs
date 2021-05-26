@@ -18,7 +18,6 @@ enum Graph {
 // stmt : node_stmt
 //      | edge_stmt
 //      | attr_stmt
-//      | ID '=' ID
 //      | subgraph
 enum Statement {
     Node {
@@ -31,7 +30,6 @@ enum Statement {
         attributes: Vec<EdgeAttribute>,
     },
     Attr(Vec<Attribute>),
-    Equality(Identifier, Identifier),
     Subgraph {
         id: Identifier,
         statements: Vec<Statement>,
@@ -45,13 +43,17 @@ enum Attribute {
 }
 
 enum GraphAttribute {
+    Color(String),
+    Label(String),
     RankDir(String),
     Size(f64),
+    Style(String),
 }
 
 enum NodeAttribute {
+    Color(String),
     Shape(String),
-    Label(String),
+    Style(String),
 }
 
 enum EdgeAttribute {
@@ -190,54 +192,63 @@ impl<W: io::Write> DotVisitor<io::Result<()>> for PrettyPrinter<W> {
             }
             Statement::Attr(attributes) => {
                 for attr in attributes {
+                    self.indent()?;
                     match attr {
                         Attribute::Graph(g) => {
                             self.visit_graph_attribute(g)?;
-                            self.newline()?;
+                            self.semicolon()?;
                         }
-                        Attribute::Node(n) => self.visit_node_attribute(n)?,
-                        Attribute::Edge(e) => self.visit_edge_attribute(e)?,
+                        Attribute::Node(n) => {
+                            self.writer.write_all(b"node [")?;
+                            self.visit_node_attribute(n)?;
+                            self.writer.write_all(b"];\n")?;
+                        }
+                        Attribute::Edge(e) => {
+                            self.writer.write_all(b"edge [")?;
+                            self.visit_edge_attribute(e)?;
+                            self.writer.write_all(b"];\n")?;
+                        }
                     }
                 }
             }
-            Statement::Equality(_, _) => {
-                todo!()
-            }
             Statement::Subgraph { id, statements } => {
-                todo!();
+                self.indent()?;
+                write!(self.writer, "subgraph {} {{\n", id)?;
+                self.depth += 1;
+                for s in statements {
+                    self.visit_statement(s)?;
+                }
+                self.depth -= 1;
+                self.indent()?;
+                self.writer.write_all(b"}\n")?;
             }
         }
         Ok(())
     }
 
     fn visit_graph_attribute(&mut self, graph_attribute: &GraphAttribute) -> io::Result<()> {
-        self.indent()?;
         match graph_attribute {
-            GraphAttribute::RankDir(layout) => {
-                write!(self.writer, "rankdir={};", layout)?;
-            }
-            GraphAttribute::Size(s) => {
-                write!(self.writer, "size={};", s)?;
-            }
+            GraphAttribute::Color(c) => write!(self.writer, "color = {};", c)?,
+            GraphAttribute::Label(l) => write!(self.writer, "label = \"{}\";", l)?,
+            GraphAttribute::RankDir(l) => write!(self.writer, "rankdir = {};", l)?,
+            GraphAttribute::Size(s) => write!(self.writer, "size = {};", s)?,
+            GraphAttribute::Style(s) => write!(self.writer, "style = {};", s)?,
         }
         Ok(())
     }
 
     fn visit_node_attribute(&mut self, node_attribute: &NodeAttribute) -> io::Result<()> {
         match node_attribute {
-            NodeAttribute::Shape(s) => {
-                write!(self.writer, "shape = \"{}\"", s)?;
-            }
-            NodeAttribute::Label(_) => {}
+            NodeAttribute::Color(c) => write!(self.writer, "color = {}", c)?,
+            NodeAttribute::Shape(s) => write!(self.writer, "shape = {}", s)?,
+            NodeAttribute::Style(s) => write!(self.writer, "style = {}", s)?,
         }
         Ok(())
     }
 
     fn visit_edge_attribute(&mut self, edge_attribute: &EdgeAttribute) -> io::Result<()> {
         match edge_attribute {
-            EdgeAttribute::Label(l) => {
-                write!(self.writer, "label = \"{}\"", l)?;
-            }
+            EdgeAttribute::Label(l) => write!(self.writer, "label = \"{}\"", l)?,
         }
         Ok(())
     }
@@ -275,6 +286,7 @@ mod tests {
 
     #[test]
     fn finite_state_machine() {
+        // https://graphviz.org/Gallery/directed/fsm.html
         let graph = Graph::Directed {
             strict: false,
             id: Some("finite_state_machine".to_string()),
@@ -310,7 +322,119 @@ mod tests {
         };
 
         let writer = io::stdout();
-        let mut s = String::new();
+        pretty_print(&graph, writer);
+    }
+
+    #[test]
+    fn clusters() {
+        // https://graphviz.org/Gallery/directed/cluster.html
+        let graph = Graph::Directed {
+            strict: false,
+            id: Some("G".to_string()),
+            statements: vec![
+                Statement::Subgraph {
+                    id: "cluster_0".to_string(),
+                    statements: vec![
+                        Statement::Attr(vec![
+                            Attribute::Graph(GraphAttribute::Style("filled".to_string())),
+                            Attribute::Graph(GraphAttribute::Color("lightgrey".to_string())),
+                            Attribute::Node(NodeAttribute::Style("filled".to_string())),
+                            Attribute::Node(NodeAttribute::Color("white".to_string())),
+                        ]),
+                        Statement::Edge {
+                            from: "a0".to_string(),
+                            to: "a1".to_string(),
+                            attributes: vec![],
+                        },
+                        Statement::Edge {
+                            from: "a1".to_string(),
+                            to: "a2".to_string(),
+                            attributes: vec![],
+                        },
+                        Statement::Edge {
+                            from: "a2".to_string(),
+                            to: "a3".to_string(),
+                            attributes: vec![],
+                        },
+                        Statement::Attr(vec![Attribute::Graph(GraphAttribute::Label(
+                            "process #1".to_string(),
+                        ))]),
+                    ],
+                },
+                Statement::Subgraph {
+                    id: "cluster_1".to_string(),
+                    statements: vec![
+                        Statement::Attr(vec![Attribute::Node(NodeAttribute::Style(
+                            "filled".to_string(),
+                        ))]),
+                        Statement::Edge {
+                            from: "b0".to_string(),
+                            to: "b1".to_string(),
+                            attributes: vec![],
+                        },
+                        Statement::Edge {
+                            from: "b1".to_string(),
+                            to: "b2".to_string(),
+                            attributes: vec![],
+                        },
+                        Statement::Edge {
+                            from: "b2".to_string(),
+                            to: "b3".to_string(),
+                            attributes: vec![],
+                        },
+                        Statement::Attr(vec![
+                            Attribute::Graph(GraphAttribute::Label("process #2".to_string())),
+                            Attribute::Graph(GraphAttribute::Color("blue".to_string())),
+                        ]),
+                    ],
+                },
+                Statement::Edge {
+                    from: "start".to_string(),
+                    to: "a0".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Edge {
+                    from: "start".to_string(),
+                    to: "b0".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Edge {
+                    from: "a1".to_string(),
+                    to: "b3".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Edge {
+                    from: "b2".to_string(),
+                    to: "b3".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Edge {
+                    from: "a3".to_string(),
+                    to: "a0".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Edge {
+                    from: "a3".to_string(),
+                    to: "end".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Edge {
+                    from: "b3".to_string(),
+                    to: "end".to_string(),
+                    attributes: vec![],
+                },
+                Statement::Node {
+                    id: "start".to_string(),
+                    attributes: vec![NodeAttribute::Shape("Mdiamond".to_string())],
+                },
+                Statement::Node {
+                    id: "end".to_string(),
+                    attributes: vec![NodeAttribute::Shape("Msquare".to_string())],
+                },
+            ],
+        };
+
+        let writer = io::stdout();
         pretty_print(&graph, writer);
     }
 }
