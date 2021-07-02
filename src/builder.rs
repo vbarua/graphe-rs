@@ -28,6 +28,7 @@ impl EntityContext for DefaultContext {}
 
 struct DotLayout;
 struct NeatoLayout;
+
 struct UnspecifiedLayout;
 
 trait LayoutContext {}
@@ -38,6 +39,7 @@ impl LayoutContext for UnspecifiedLayout {}
 struct BitmapOutput;
 struct PostscriptOutput;
 struct SVGOutput;
+
 struct UnspecifiedOutput;
 
 trait OutputContext {}
@@ -77,6 +79,14 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
+    fn build(self) -> Graph {
+        Graph {
+            strict: false,
+            id: None,
+            statements: self.statements,
+        }
+    }
+
     fn attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
@@ -440,19 +450,27 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::printer::print_graph;
+    use std::str;
 
     #[test]
     fn hello_world() {
         // https://graphviz.org/Gallery/directed/hello.html
-        directed().dot().edge_("Hello", "World");
-        assert_eq!(true, true);
+        let mut builder = directed().dot();
+        builder.edge_("Hello", "World");
+
+        let graph = builder.build();
+        let mut writer = Vec::new();
+        print_graph(&mut writer, &graph).unwrap();
+        let s = str::from_utf8(&writer).unwrap();
+        println!("{}", s);
     }
 
     #[test]
     fn clusters() {
         // https://graphviz.org/Gallery/directed/cluster.html{
-        directed()
-            .dot()
+        let mut builder = directed().dot();
+        builder
             .cluster("0", |builder| {
                 builder
                     .attributes(|builder| builder.style(NodeStyle::Filled).color(Color::LightGrey))
@@ -460,6 +478,7 @@ mod tests {
                     .edge_("a0", "a1")
                     .edge_("a1", "a2")
                     .edge_("a2", "a3")
+                    .attributes(|builder| builder.label("process #1"))
             })
             .cluster("1", |builder| {
                 builder
@@ -479,13 +498,18 @@ mod tests {
             .node("start", |builder| builder.shape(Shape::MDiamond))
             .node("end", |builder| builder.shape(Shape::MSquare));
 
-        assert_eq!(true, true);
+        let graph = builder.build();
+        let mut writer = Vec::new();
+        print_graph(&mut writer, &graph).unwrap();
+        let s = str::from_utf8(&writer).unwrap();
+        println!("{}", s);
     }
 
     #[test]
     fn finite_state_machine() {
-        directed()
-            .dot()
+        // https://graphviz.org/Gallery/directed/fsm.html
+        let mut builder = directed().dot();
+        builder
             .attributes(|builder| builder.rankdir(RankDir::LeftRight))
             .graph_attributes(|builder| builder.size((8., 5.).into()))
             .node_attributes(|builder| builder.shape(Shape::DoubleCircle))
@@ -498,6 +522,10 @@ mod tests {
             .edge("0", "1", |builder| builder.label("SS(B)"))
             .edge("1", "3", |builder| builder.label("SS(B)"));
 
-        assert_eq!(true, true)
+        let graph = builder.build();
+        let mut writer = Vec::new();
+        print_graph(&mut writer, &graph).unwrap();
+        let s = str::from_utf8(&writer).unwrap();
+        println!("{}", s)
     }
 }

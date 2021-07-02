@@ -144,7 +144,7 @@ impl<W: io::Write> DotVisitor<io::Result<()>> for PrettyPrinter<W> {
         self.newline()?;
         self.depth += 1;
         for s in statements {
-            self.visit_statement(s);
+            self.visit_statement(s)?;
         }
         self.writer.write_all(b"}")?;
         self.newline()?;
