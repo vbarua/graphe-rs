@@ -2,7 +2,7 @@
 
 use std::marker::PhantomData;
 
-use crate::ast_min::*;
+use crate::ast::*;
 
 pub struct DirectedGraph;
 pub struct UndirectedGraph;

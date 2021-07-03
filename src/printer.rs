@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::ast_min::{Attribute, AttributeScope, Graph, Statement};
+use crate::ast::{Attribute, AttributeScope, Graph, Statement};
 
 trait AstVisitor<T> {
     fn visit_graph(&mut self, graph: &Graph) -> T;
