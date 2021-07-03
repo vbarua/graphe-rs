@@ -1,5 +1,5 @@
 [package]
-name = "graphe-rs"
+name = "graphe"
 version = "0.1.0"
 authors = ["Victor Barua <victor.barua@gmail.com>"]
 edition = "2018"
