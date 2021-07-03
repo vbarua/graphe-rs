@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::ast::{Attribute, AttributeScope, Graph, Statement};
+use crate::ast::{Attribute, AttributeScope, Graph, GraphType, Statement};
 
 trait AstVisitor<T> {
     fn visit_graph(&mut self, graph: &Graph) -> T;
@@ -9,11 +9,20 @@ trait AstVisitor<T> {
 }
 
 pub fn print_graph<W: io::Write>(writer: &mut W, graph: &Graph) -> io::Result<()> {
-    let mut printer = Printer { depth: 0, writer };
+    let arrow = match graph.gtype {
+        GraphType::Directed => "->",
+        GraphType::Undirected => "--",
+    };
+    let mut printer = Printer {
+        arrow: arrow.to_string(),
+        depth: 0,
+        writer,
+    };
     printer.visit_graph(graph)
 }
 
 struct Printer<W: io::Write> {
+    arrow: String,
     depth: i32,
     writer: W,
 }
@@ -29,7 +38,7 @@ impl<W: io::Write> Printer<W> {
 
     #[inline]
     fn arrow(&mut self, left: &str, right: &str) -> io::Result<()> {
-        write!(self.writer, "{} -> {}", left, right)
+        write!(self.writer, "{} {} {}", left, self.arrow, right)
     }
 
     fn print_attribute(&mut self, attribute: &Attribute) -> io::Result<()> {
@@ -49,8 +58,10 @@ impl<W: io::Write> AstVisitor<io::Result<()>> for Printer<W> {
         if graph.strict {
             self.writer.write_all(b"strict ")?;
         }
-        // TODO: Should be graph OR digraph
-        write!(self.writer, "graph")?;
+        match graph.gtype {
+            crate::ast::GraphType::Directed => write!(self.writer, "digraph")?,
+            crate::ast::GraphType::Undirected => write!(self.writer, "graph")?,
+        }
 
         if let Some(id) = &graph.id {
             write!(self.writer, " {}", id)?;

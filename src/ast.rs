@@ -2,8 +2,14 @@
 
 use std::fmt::Display;
 
+pub(crate) enum GraphType {
+    Directed,
+    Undirected,
+}
+
 pub struct Graph {
     pub(crate) strict: bool,
+    pub(crate) gtype: GraphType,
     pub(crate) id: Option<String>,
     pub(crate) statements: Vec<Statement>,
 }

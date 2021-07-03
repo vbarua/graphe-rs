@@ -2,6 +2,7 @@
 
 use std::marker::PhantomData;
 
+use crate::ast;
 use crate::ast::*;
 
 pub struct DirectedGraph;
@@ -71,20 +72,42 @@ pub struct GraphBuilder<GT: GraphType, LC: LayoutContext, OC: OutputContext> {
     output_context: PhantomData<OC>,
 }
 
-impl<GT, LC, OC> GraphBuilder<GT, LC, OC>
+impl<LC, OC> GraphBuilder<DirectedGraph, LC, OC>
 where
-    GT: GraphType,
     LC: LayoutContext,
     OC: OutputContext,
 {
     pub fn build(self) -> Graph {
         Graph {
             strict: false,
+            gtype: ast::GraphType::Directed,
             id: None,
             statements: self.statements,
         }
     }
+}
 
+impl<LC, OC> GraphBuilder<UndirectedGraph, LC, OC>
+where
+    LC: LayoutContext,
+    OC: OutputContext,
+{
+    pub fn build(self) -> Graph {
+        Graph {
+            strict: false,
+            gtype: ast::GraphType::Undirected,
+            id: None,
+            statements: self.statements,
+        }
+    }
+}
+
+impl<GT, LC, OC> GraphBuilder<GT, LC, OC>
+where
+    GT: GraphType,
+    LC: LayoutContext,
+    OC: OutputContext,
+{
     pub fn attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
