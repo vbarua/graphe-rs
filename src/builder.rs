@@ -4,21 +4,21 @@ use std::marker::PhantomData;
 
 use crate::ast_min::*;
 
-struct DirectedGraph;
-struct UndirectedGraph;
+pub struct DirectedGraph;
+pub struct UndirectedGraph;
 
-trait GraphType {}
+pub trait GraphType {}
 impl GraphType for DirectedGraph {}
 impl GraphType for UndirectedGraph {}
 
-struct GraphContext;
-struct NodeContext;
-struct EdgeContext;
-struct SubgraphContext;
-struct ClusterContext;
-struct DefaultContext;
+pub struct GraphContext;
+pub struct NodeContext;
+pub struct EdgeContext;
+pub struct SubgraphContext;
+pub struct ClusterContext;
+pub struct DefaultContext;
 
-trait EntityContext {}
+pub trait EntityContext {}
 impl EntityContext for GraphContext {}
 impl EntityContext for NodeContext {}
 impl EntityContext for EdgeContext {}
@@ -26,29 +26,27 @@ impl EntityContext for SubgraphContext {}
 impl EntityContext for ClusterContext {}
 impl EntityContext for DefaultContext {}
 
-struct DotLayout;
-struct NeatoLayout;
+pub struct DotLayout;
+pub struct NeatoLayout;
+pub struct UnspecifiedLayout;
 
-struct UnspecifiedLayout;
-
-trait LayoutContext {}
+pub trait LayoutContext {}
 impl LayoutContext for DotLayout {}
 impl LayoutContext for NeatoLayout {}
 impl LayoutContext for UnspecifiedLayout {}
 
-struct BitmapOutput;
-struct PostscriptOutput;
-struct SVGOutput;
+pub struct BitmapOutput;
+pub struct PostscriptOutput;
+pub struct SVGOutput;
+pub struct UnspecifiedOutput;
 
-struct UnspecifiedOutput;
-
-trait OutputContext {}
+pub trait OutputContext {}
 impl OutputContext for BitmapOutput {}
 impl OutputContext for PostscriptOutput {}
 impl OutputContext for SVGOutput {}
 impl OutputContext for UnspecifiedOutput {}
 
-fn directed() -> GraphBuilder<DirectedGraph, UnspecifiedLayout, UnspecifiedOutput> {
+pub fn directed() -> GraphBuilder<DirectedGraph, UnspecifiedLayout, UnspecifiedOutput> {
     GraphBuilder {
         statements: Vec::new(),
         graph_type: PhantomData,
@@ -57,7 +55,7 @@ fn directed() -> GraphBuilder<DirectedGraph, UnspecifiedLayout, UnspecifiedOutpu
     }
 }
 
-fn undirected() -> GraphBuilder<UndirectedGraph, UnspecifiedLayout, UnspecifiedOutput> {
+pub fn undirected() -> GraphBuilder<UndirectedGraph, UnspecifiedLayout, UnspecifiedOutput> {
     GraphBuilder {
         statements: Vec::new(),
         graph_type: PhantomData,
@@ -66,7 +64,7 @@ fn undirected() -> GraphBuilder<UndirectedGraph, UnspecifiedLayout, UnspecifiedO
     }
 }
 
-struct GraphBuilder<GT: GraphType, LC: LayoutContext, OC: OutputContext> {
+pub struct GraphBuilder<GT: GraphType, LC: LayoutContext, OC: OutputContext> {
     statements: Vec<Statement>,
     graph_type: PhantomData<GT>,
     layout_context: PhantomData<LC>,
@@ -79,7 +77,7 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    fn build(self) -> Graph {
+    pub fn build(self) -> Graph {
         Graph {
             strict: false,
             id: None,
@@ -87,7 +85,7 @@ where
         }
     }
 
-    fn attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<DefaultContext, LC, OC>,
@@ -133,7 +131,7 @@ where
         self
     }
 
-    fn node<F>(&mut self, id: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn node<F>(&mut self, id: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<NodeContext, LC, OC>,
@@ -148,7 +146,7 @@ where
         self
     }
 
-    fn node_(&mut self, id: &str) -> &mut GraphBuilder<GT, LC, OC> {
+    pub fn node_(&mut self, id: &str) -> &mut GraphBuilder<GT, LC, OC> {
         self.statements.push(Statement::Node {
             id: id.to_string(),
             attributes: Vec::new(),
@@ -156,7 +154,7 @@ where
         self
     }
 
-    fn edge<F>(&mut self, from: &str, to: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn edge<F>(&mut self, from: &str, to: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<EdgeContext, LC, OC>,
@@ -172,7 +170,7 @@ where
         self
     }
 
-    fn edge_(&mut self, from: &str, to: &str) -> &mut GraphBuilder<GT, LC, OC> {
+    pub fn edge_(&mut self, from: &str, to: &str) -> &mut GraphBuilder<GT, LC, OC> {
         self.statements.push(Statement::Edge {
             from: from.to_string(),
             to: to.to_string(),
@@ -181,7 +179,7 @@ where
         self
     }
 
-    fn cluster<F>(&mut self, id: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn cluster<F>(&mut self, id: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(&mut StatementBuilder<LC, OC>) -> &mut StatementBuilder<LC, OC>,
     {
@@ -201,7 +199,7 @@ where
     GT: GraphType,
     LC: LayoutContext,
 {
-    fn bitmap(self) -> GraphBuilder<GT, LC, BitmapOutput> {
+    pub fn bitmap(self) -> GraphBuilder<GT, LC, BitmapOutput> {
         GraphBuilder {
             statements: self.statements,
             graph_type: self.graph_type,
@@ -210,7 +208,7 @@ where
         }
     }
 
-    fn svg(self) -> GraphBuilder<GT, LC, SVGOutput> {
+    pub fn svg(self) -> GraphBuilder<GT, LC, SVGOutput> {
         GraphBuilder {
             statements: self.statements,
             graph_type: self.graph_type,
@@ -225,7 +223,7 @@ where
     GT: GraphType,
     OC: OutputContext,
 {
-    fn dot(self) -> GraphBuilder<GT, DotLayout, OC> {
+    pub fn dot(self) -> GraphBuilder<GT, DotLayout, OC> {
         GraphBuilder {
             statements: self.statements,
             graph_type: self.graph_type,
@@ -234,7 +232,7 @@ where
         }
     }
 
-    fn neato(self) -> GraphBuilder<GT, NeatoLayout, OC> {
+    pub fn neato(self) -> GraphBuilder<GT, NeatoLayout, OC> {
         GraphBuilder {
             statements: self.statements,
             graph_type: self.graph_type,
@@ -244,7 +242,7 @@ where
     }
 }
 
-struct StatementBuilder<LC: LayoutContext, OC: OutputContext> {
+pub struct StatementBuilder<LC: LayoutContext, OC: OutputContext> {
     statements: Vec<Statement>,
     layout_context: PhantomData<LC>,
     output_context: PhantomData<OC>,
@@ -267,7 +265,7 @@ where
         self.statements
     }
 
-    fn attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<DefaultContext, LC, OC>,
@@ -298,7 +296,7 @@ where
         self
     }
 
-    fn node<F>(&mut self, id: &str, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn node<F>(&mut self, id: &str, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<NodeContext, LC, OC>,
@@ -313,7 +311,7 @@ where
         self
     }
 
-    fn edge<F>(&mut self, from: &str, to: &str, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn edge<F>(&mut self, from: &str, to: &str, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<EdgeContext, LC, OC>,
@@ -329,7 +327,7 @@ where
         self
     }
 
-    fn edge_(&mut self, from: &str, to: &str) -> &mut StatementBuilder<LC, OC> {
+    pub fn edge_(&mut self, from: &str, to: &str) -> &mut StatementBuilder<LC, OC> {
         self.statements.push(Statement::Edge {
             from: from.to_string(),
             to: to.to_string(),
@@ -339,7 +337,7 @@ where
     }
 }
 
-struct AttributeBuilder<EC: EntityContext, LC: LayoutContext, OC: OutputContext> {
+pub struct AttributeBuilder<EC: EntityContext, LC: LayoutContext, OC: OutputContext> {
     attributes: Vec<Attribute>,
     entity_context: PhantomData<EC>,
     layout_context: PhantomData<LC>,
@@ -365,7 +363,7 @@ where
         self.attributes
     }
 
-    fn label(&mut self, label: &str) -> &mut AttributeBuilder<EC, LC, OC> {
+    pub fn label(&mut self, label: &str) -> &mut AttributeBuilder<EC, LC, OC> {
         self.attributes.push(Attribute::Label(label.to_string()));
         self
     }
