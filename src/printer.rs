@@ -38,7 +38,7 @@ impl<W: io::Write> Printer<W> {
 
     #[inline]
     fn arrow(&mut self, left: &str, right: &str) -> io::Result<()> {
-        write!(self.writer, "{} {} {}", left, self.arrow, right)
+        write!(self.writer, "\"{}\" {} \"{}\"", left, self.arrow, right)
     }
 
     fn print_attribute(&mut self, attribute: &Attribute) -> io::Result<()> {
@@ -98,7 +98,7 @@ impl<W: io::Write> AstVisitor<io::Result<()>> for Printer<W> {
             }
             Statement::Node { id, attributes } => {
                 self.indent()?;
-                write!(self.writer, "{}", id)?;
+                write!(self.writer, "\"{}\"", id)?;
                 self.visit_attributes(attributes)?;
                 self.writer.write_all(b";\n")?;
             }
