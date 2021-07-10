@@ -4,6 +4,7 @@ use std::marker::PhantomData;
 
 use crate::ast;
 use crate::ast::*;
+use crate::attributes::{Color, RankDir, Shape, Size};
 
 pub struct DirectedGraph;
 pub struct UndirectedGraph;

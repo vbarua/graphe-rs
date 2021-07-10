@@ -2,6 +2,8 @@
 
 use std::fmt::Display;
 
+use crate::attributes::{Color, RankDir, Shape, Size};
+
 pub(crate) enum GraphType {
     Directed,
     Undirected,
@@ -46,96 +48,6 @@ pub(crate) enum Attribute {
     StyleNode(NodeStyle),
     Shape(Shape),
     Size(Size),
-}
-
-pub(crate) enum Color {
-    Blue,
-    LightGrey,
-    White,
-}
-
-impl Display for Color {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            Color::Blue => "blue",
-            Color::LightGrey => "lightgrey",
-            Color::White => "white",
-        };
-        f.write_str(s)
-    }
-}
-
-pub(crate) enum RankDir {
-    TopBottom,
-    LeftRight,
-    BottomTop,
-    RightLeft,
-}
-
-impl Display for RankDir {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            RankDir::TopBottom => "TB",
-            RankDir::LeftRight => "LR",
-            RankDir::BottomTop => "BT",
-            RankDir::RightLeft => "RL",
-        };
-        f.write_str(s)
-    }
-}
-
-pub(crate) enum Shape {
-    Box,
-    Circle,
-    Diamond,
-    DoubleCircle,
-    Ellipse,
-    MDiamond,
-    MSquare,
-}
-
-impl Display for Shape {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            Shape::Box => "box",
-            Shape::Circle => "circle",
-            Shape::Diamond => "diamond",
-            Shape::DoubleCircle => "doublecircle",
-            Shape::Ellipse => "ellipse",
-            Shape::MDiamond => "Mdiamond",
-            Shape::MSquare => "Msquare",
-        };
-        f.write_str(s)
-    }
-}
-
-pub(crate) struct Size {
-    width: f64,
-    height: f64,
-}
-
-impl Display for Size {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "\"{},{}\"", self.width, self.height)
-    }
-}
-
-impl From<f64> for Size {
-    fn from(f: f64) -> Self {
-        Size {
-            width: f,
-            height: f,
-        }
-    }
-}
-
-impl From<(f64, f64)> for Size {
-    fn from(fs: (f64, f64)) -> Self {
-        Size {
-            width: fs.0,
-            height: fs.1,
-        }
-    }
 }
 
 pub(crate) enum NodeStyle {
