@@ -2,7 +2,7 @@
 
 use std::fmt::Display;
 
-use crate::attributes::{Color, RankDir, Shape, Size};
+use crate::attributes::{Color, RankDir, Shape, Size, Style};
 
 pub(crate) enum GraphType {
     Directed,
@@ -45,20 +45,7 @@ pub(crate) enum Attribute {
     Label(String),
     Length(f64),
     RankDir(RankDir),
-    StyleNode(NodeStyle),
+    Style(Style),
     Shape(Shape),
     Size(Size),
-}
-
-pub(crate) enum NodeStyle {
-    Filled,
-}
-
-impl Display for NodeStyle {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            NodeStyle::Filled => "filled",
-        };
-        f.write_str(s)
-    }
 }

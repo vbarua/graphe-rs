@@ -47,7 +47,7 @@ impl<W: io::Write> Printer<W> {
             Attribute::Label(l) => write!(self.writer, "label=\"{}\"", l),
             Attribute::Length(l) => write!(self.writer, "len={:.2}", l),
             Attribute::RankDir(rd) => write!(self.writer, "rankdir={}", rd),
-            Attribute::StyleNode(s) => write!(self.writer, "style={}", s),
+            Attribute::Style(s) => write!(self.writer, "style={}", s),
             Attribute::Shape(s) => write!(self.writer, "shape={}", s),
             Attribute::Size(s) => write!(self.writer, "size={}", s),
         }
