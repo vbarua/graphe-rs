@@ -41,6 +41,7 @@ pub(crate) enum Statement {
 pub(crate) enum Attribute {
     Color(Color),
     Label(String),
+    Length(f64),
     RankDir(RankDir),
     StyleNode(NodeStyle),
     Shape(Shape),
@@ -86,7 +87,9 @@ impl Display for RankDir {
 pub(crate) enum Shape {
     Box,
     Circle,
+    Diamond,
     DoubleCircle,
+    Ellipse,
     MDiamond,
     MSquare,
 }
@@ -96,7 +99,9 @@ impl Display for Shape {
         let s = match self {
             Shape::Box => "box",
             Shape::Circle => "circle",
+            Shape::Diamond => "diamond",
             Shape::DoubleCircle => "doublecircle",
+            Shape::Ellipse => "ellipse",
             Shape::MDiamond => "Mdiamond",
             Shape::MSquare => "Msquare",
         };

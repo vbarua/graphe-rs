@@ -45,6 +45,7 @@ impl<W: io::Write> Printer<W> {
         match attribute {
             Attribute::Color(c) => write!(self.writer, "color={}", c),
             Attribute::Label(l) => write!(self.writer, "label=\"{}\"", l),
+            Attribute::Length(l) => write!(self.writer, "len={:.2}", l),
             Attribute::RankDir(rd) => write!(self.writer, "rankdir={}", rd),
             Attribute::StyleNode(s) => write!(self.writer, "style={}", s),
             Attribute::Shape(s) => write!(self.writer, "shape={}", s),

@@ -468,6 +468,16 @@ where
     }
 }
 
+impl<OC> AttributeBuilder<EdgeContext, NeatoLayout, OC>
+where
+    OC: OutputContext,
+{
+    fn len(&mut self, length: f64) -> &mut AttributeBuilder<EdgeContext, NeatoLayout, OC> {
+        self.attributes.push(Attribute::Length(length));
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -542,6 +552,43 @@ mod tests {
             .edge("0", "2", |builder| builder.label("SS(B)"))
             .edge("0", "1", |builder| builder.label("SS(B)"))
             .edge("1", "3", |builder| builder.label("SS(B)"));
+
+        let graph = builder.build();
+        let mut writer = Vec::new();
+        print_graph(&mut writer, &graph).unwrap();
+        let s = str::from_utf8(&writer).unwrap();
+        println!("{}", s)
+    }
+
+    #[test]
+    fn entity_relation_diagram() {
+        // https://graphviz.org/Gallery/undirected/ER.html
+        let mut builder = undirected().neato();
+        builder
+            .node("course", |ab| ab.shape(Shape::Box))
+            .node("institute", |ab| ab.shape(Shape::Box))
+            .node("student", |ab| ab.shape(Shape::Box))
+            .node("name0", |ab| ab.shape(Shape::Ellipse).label("name"))
+            .node("name1", |ab| ab.shape(Shape::Ellipse).label("name"))
+            .node("name2", |ab| ab.shape(Shape::Ellipse).label("name"))
+            .node("code", |ab| ab.shape(Shape::Ellipse))
+            .node("grade", |ab| ab.shape(Shape::Ellipse))
+            .node("number", |ab| ab.shape(Shape::Ellipse))
+            .node("C-I", |ab| ab.shape(Shape::Diamond).color(Color::LightGrey))
+            .node("S-C", |ab| ab.shape(Shape::Diamond).color(Color::LightGrey))
+            .node("S-I", |ab| ab.shape(Shape::Diamond).color(Color::LightGrey))
+            .edge_("name0", "course")
+            .edge_("code", "course")
+            .edge("course", "C-I", |ab| ab.label("n").len(1.00))
+            .edge("C-I", "institute", |ab| ab.label("1").len(1.00))
+            .edge_("institute", "name1")
+            .edge("institute", "S-I", |ab| ab.label("1").len(1.00))
+            .edge("S-I", "student", |ab| ab.label("n").len(1.00))
+            .edge_("student", "grade")
+            .edge_("student", "name2")
+            .edge_("student", "number")
+            .edge("student", "S-C", |ab| ab.label("m").len(1.00))
+            .edge("S-C", "course", |ab| ab.label("n").len(1.00));
 
         let graph = builder.build();
         let mut writer = Vec::new();
