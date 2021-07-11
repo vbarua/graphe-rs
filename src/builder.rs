@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 
 use crate::ast;
 use crate::ast::*;
-use crate::attributes::{Color, EdgeStyle, NodeStyle, RankDir, Shape, Size};
+use crate::attributes::{ClusterStyle, Color, EdgeStyle, NodeStyle, RankDir, Shape, Size};
 
 pub struct DirectedGraph;
 pub struct UndirectedGraph;
@@ -18,7 +18,6 @@ pub struct NodeContext;
 pub struct EdgeContext;
 pub struct SubgraphContext;
 pub struct ClusterContext;
-pub struct DefaultContext;
 
 pub trait EntityContext {}
 impl EntityContext for GraphContext {}
@@ -26,7 +25,6 @@ impl EntityContext for NodeContext {}
 impl EntityContext for EdgeContext {}
 impl EntityContext for SubgraphContext {}
 impl EntityContext for ClusterContext {}
-impl EntityContext for DefaultContext {}
 
 pub struct DotLayout;
 pub struct NeatoLayout;
@@ -109,22 +107,6 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    pub fn attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
-    where
-        F: FnOnce(
-            &mut AttributeBuilder<DefaultContext, LC, OC>,
-        ) -> &mut AttributeBuilder<DefaultContext, LC, OC>,
-    {
-        let mut attribute_builder: AttributeBuilder<DefaultContext, LC, OC> =
-            AttributeBuilder::new();
-        f(&mut attribute_builder);
-        self.statements.push(Statement::Attribute(
-            AttributeScope::Default,
-            attribute_builder.build(),
-        ));
-        self
-    }
-
     fn node_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
@@ -289,17 +271,16 @@ where
         self.statements
     }
 
-    pub fn attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
+    fn graph_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
-            &mut AttributeBuilder<DefaultContext, LC, OC>,
-        ) -> &mut AttributeBuilder<DefaultContext, LC, OC>,
+            &mut AttributeBuilder<GraphContext, LC, OC>,
+        ) -> &mut AttributeBuilder<GraphContext, LC, OC>,
     {
-        let mut attribute_builder: AttributeBuilder<DefaultContext, LC, OC> =
-            AttributeBuilder::new();
+        let mut attribute_builder: AttributeBuilder<GraphContext, LC, OC> = AttributeBuilder::new();
         f(&mut attribute_builder);
         self.statements.push(Statement::Attribute(
-            AttributeScope::Default,
+            AttributeScope::Graph,
             attribute_builder.build(),
         ));
         self
@@ -425,6 +406,22 @@ where
     }
 }
 
+impl<LC, OC> AttributeBuilder<GraphContext, LC, OC>
+where
+    LC: LayoutContext,
+    OC: OutputContext,
+{
+    fn color(&mut self, color: Color) -> &mut AttributeBuilder<GraphContext, LC, OC> {
+        self.attributes.push(Attribute::Color(color));
+        self
+    }
+
+    fn style(&mut self, style: ClusterStyle) -> &mut AttributeBuilder<GraphContext, LC, OC> {
+        self.attributes.push(Attribute::Style(style.into()));
+        self
+    }
+}
+
 impl<LC, OC> AttributeBuilder<NodeContext, LC, OC>
 where
     LC: LayoutContext,
@@ -434,6 +431,7 @@ where
         self.attributes.push(Attribute::Color(color));
         self
     }
+
     fn shape(&mut self, shape: Shape) -> &mut AttributeBuilder<NodeContext, LC, OC> {
         self.attributes.push(Attribute::Shape(shape));
         self
@@ -441,41 +439,6 @@ where
 
     fn style(&mut self, style: NodeStyle) -> &mut AttributeBuilder<NodeContext, LC, OC> {
         self.attributes.push(Attribute::Style(style.into()));
-        self
-    }
-}
-
-impl<LC, OC> AttributeBuilder<DefaultContext, LC, OC>
-where
-    LC: LayoutContext,
-    OC: OutputContext,
-{
-    fn color(&mut self, color: Color) -> &mut AttributeBuilder<DefaultContext, LC, OC> {
-        self.attributes.push(Attribute::Color(color));
-        self
-    }
-
-    fn shape(&mut self, shape: Shape) -> &mut AttributeBuilder<DefaultContext, LC, OC> {
-        self.attributes.push(Attribute::Shape(shape));
-        self
-    }
-
-    // TODO: In theory, this should be able to take ANY style.
-    fn style(&mut self, style: NodeStyle) -> &mut AttributeBuilder<DefaultContext, LC, OC> {
-        self.attributes.push(Attribute::Style(style.into()));
-        self
-    }
-}
-
-impl<OC> AttributeBuilder<DefaultContext, DotLayout, OC>
-where
-    OC: OutputContext,
-{
-    fn rankdir(
-        &mut self,
-        rankdir: RankDir,
-    ) -> &mut AttributeBuilder<DefaultContext, DotLayout, OC> {
-        self.attributes.push(Attribute::RankDir(rankdir));
         self
     }
 }
@@ -516,12 +479,14 @@ mod tests {
         builder
             .cluster("0", |builder| {
                 builder
-                    .attributes(|builder| builder.style(NodeStyle::Filled).color(Color::LightGrey))
+                    .graph_attributes(|builder| {
+                        builder.style(ClusterStyle::Filled).color(Color::LightGrey)
+                    })
                     .node_attributes(|builder| builder.style(NodeStyle::Filled).color(Color::White))
                     .edge_("a0", "a1")
                     .edge_("a1", "a2")
                     .edge_("a2", "a3")
-                    .attributes(|builder| builder.label("process #1"))
+                    .graph_attributes(|builder| builder.label("process #1"))
             })
             .cluster("1", |builder| {
                 builder
@@ -529,7 +494,7 @@ mod tests {
                     .edge_("b0", "b1")
                     .edge_("b1", "b2")
                     .edge_("b2", "b3")
-                    .attributes(|builder| builder.label("process #2").color(Color::Blue))
+                    .graph_attributes(|builder| builder.label("process #2").color(Color::Blue))
             })
             .edge_("start", "a0")
             .edge_("start", "b0")
@@ -553,8 +518,7 @@ mod tests {
         // https://graphviz.org/Gallery/directed/fsm.html
         let mut builder = directed().dot();
         builder
-            .attributes(|builder| builder.rankdir(RankDir::LeftRight))
-            .graph_attributes(|builder| builder.size((8., 5.).into()))
+            .graph_attributes(|builder| builder.rankdir(RankDir::LeftRight).size((8., 5.).into()))
             .node_attributes(|builder| builder.shape(Shape::DoubleCircle))
             .node_("0")
             .node_("3")

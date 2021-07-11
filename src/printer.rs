@@ -79,17 +79,9 @@ impl<W: io::Write> AstVisitor<io::Result<()>> for Printer<W> {
 
     fn visit_statement(&mut self, statement: &Statement) -> io::Result<()> {
         match statement {
-            Statement::Attribute(AttributeScope::Default, attributes) => {
-                for attribute in attributes {
-                    self.indent()?;
-                    self.print_attribute(attribute)?;
-                    self.writer.write_all(b";\n")?;
-                }
-            }
             Statement::Attribute(scope, attributes) => {
                 self.indent()?;
                 match scope {
-                    AttributeScope::Default => (),
                     AttributeScope::Graph => self.writer.write_all(b"graph")?,
                     AttributeScope::Node => self.writer.write_all(b"node")?,
                     AttributeScope::Edge => self.writer.write_all(b"edge")?,

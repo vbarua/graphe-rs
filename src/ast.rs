@@ -17,7 +17,6 @@ pub struct Graph {
 }
 
 pub(crate) enum AttributeScope {
-    Default,
     Graph,
     Node,
     Edge,
