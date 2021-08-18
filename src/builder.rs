@@ -122,7 +122,7 @@ where
         self
     }
 
-    fn graph_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn graph_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<GraphContext, LC, OC>,
@@ -271,7 +271,7 @@ where
         self.statements
     }
 
-    fn graph_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn graph_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<GraphContext, LC, OC>,
