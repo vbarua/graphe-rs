@@ -4,7 +4,7 @@ use std::fmt::Display;
 // * https://graphviz.org/docs/attrs/style/
 // * https://graphviz.org/docs/attr-types/style/
 
-pub(crate) enum EdgeStyle {
+pub enum EdgeStyle {
     // Common to Edges and Nodes
     Bold,
     Dashed,
@@ -14,7 +14,7 @@ pub(crate) enum EdgeStyle {
 }
 
 // https://graphviz.org/doc/info/shapes.html#styles-for-nodes
-pub(crate) enum NodeStyle {
+pub enum NodeStyle {
     // Common to Edges and Nodes
     Bold,
     Dashed,
@@ -27,7 +27,7 @@ pub(crate) enum NodeStyle {
     Rounded,
 }
 
-pub(crate) enum ClusterStyle {
+pub enum ClusterStyle {
     Bold,
     Dashed,
     Dotted,
@@ -36,7 +36,7 @@ pub(crate) enum ClusterStyle {
     Solid,
 }
 
-pub(crate) enum Style {
+pub enum Style {
     Bold,
     Dashed,
     Diagonals,

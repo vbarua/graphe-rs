@@ -1,7 +1,3 @@
-#![allow(dead_code)]
-
-use std::fmt::Display;
-
 use crate::attributes::{Color, RankDir, Shape, Size, Style};
 
 pub(crate) enum GraphType {

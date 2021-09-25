@@ -4,8 +4,8 @@ mod shape;
 mod size;
 mod style;
 
-pub(crate) use color::Color;
-pub(crate) use rankdir::RankDir;
-pub(crate) use shape::Shape;
-pub(crate) use size::Size;
-pub(crate) use style::{ClusterStyle, EdgeStyle, NodeStyle, Style};
+pub use color::Color;
+pub use rankdir::RankDir;
+pub use shape::Shape;
+pub use size::Size;
+pub use style::{ClusterStyle, EdgeStyle, NodeStyle, Style};

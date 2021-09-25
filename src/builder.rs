@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::marker::PhantomData;
 
 use crate::ast;
@@ -107,7 +105,22 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    fn node_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn edge_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    where
+        F: FnOnce(
+            &mut AttributeBuilder<NodeContext, LC, OC>,
+        ) -> &mut AttributeBuilder<NodeContext, LC, OC>,
+    {
+        let mut attribute_builder: AttributeBuilder<NodeContext, LC, OC> = AttributeBuilder::new();
+        f(&mut attribute_builder);
+        self.statements.push(Statement::Attribute(
+            AttributeScope::Edge,
+            attribute_builder.build(),
+        ));
+        self
+    }
+
+    pub fn node_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<NodeContext, LC, OC>,
@@ -122,7 +135,7 @@ where
         self
     }
 
-    fn graph_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn graph_attributes<F>(&mut self, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<GraphContext, LC, OC>,
@@ -271,7 +284,7 @@ where
         self.statements
     }
 
-    fn graph_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn graph_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<GraphContext, LC, OC>,
@@ -286,7 +299,7 @@ where
         self
     }
 
-    fn node_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn node_attributes<F>(&mut self, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<NodeContext, LC, OC>,
@@ -379,7 +392,7 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    fn size(&mut self, size: Size) -> &mut AttributeBuilder<GraphContext, LC, OC> {
+    pub fn size(&mut self, size: Size) -> &mut AttributeBuilder<GraphContext, LC, OC> {
         self.attributes.push(Attribute::Size(size));
         self
     }
@@ -389,7 +402,10 @@ impl<OC> AttributeBuilder<GraphContext, DotLayout, OC>
 where
     OC: OutputContext,
 {
-    fn rankdir(&mut self, rankdir: RankDir) -> &mut AttributeBuilder<GraphContext, DotLayout, OC> {
+    pub fn rankdir(
+        &mut self,
+        rankdir: RankDir,
+    ) -> &mut AttributeBuilder<GraphContext, DotLayout, OC> {
         self.attributes.push(Attribute::RankDir(rankdir));
         self
     }
@@ -400,7 +416,7 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    fn style(&mut self, style: EdgeStyle) -> &mut AttributeBuilder<EdgeContext, LC, OC> {
+    pub fn style(&mut self, style: EdgeStyle) -> &mut AttributeBuilder<EdgeContext, LC, OC> {
         self.attributes.push(Attribute::Style(style.into()));
         self
     }
@@ -411,12 +427,12 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    fn color(&mut self, color: Color) -> &mut AttributeBuilder<GraphContext, LC, OC> {
+    pub fn color(&mut self, color: Color) -> &mut AttributeBuilder<GraphContext, LC, OC> {
         self.attributes.push(Attribute::Color(color));
         self
     }
 
-    fn style(&mut self, style: ClusterStyle) -> &mut AttributeBuilder<GraphContext, LC, OC> {
+    pub fn style(&mut self, style: ClusterStyle) -> &mut AttributeBuilder<GraphContext, LC, OC> {
         self.attributes.push(Attribute::Style(style.into()));
         self
     }
@@ -427,17 +443,17 @@ where
     LC: LayoutContext,
     OC: OutputContext,
 {
-    fn color(&mut self, color: Color) -> &mut AttributeBuilder<NodeContext, LC, OC> {
+    pub fn color(&mut self, color: Color) -> &mut AttributeBuilder<NodeContext, LC, OC> {
         self.attributes.push(Attribute::Color(color));
         self
     }
 
-    fn shape(&mut self, shape: Shape) -> &mut AttributeBuilder<NodeContext, LC, OC> {
+    pub fn shape(&mut self, shape: Shape) -> &mut AttributeBuilder<NodeContext, LC, OC> {
         self.attributes.push(Attribute::Shape(shape));
         self
     }
 
-    fn style(&mut self, style: NodeStyle) -> &mut AttributeBuilder<NodeContext, LC, OC> {
+    pub fn style(&mut self, style: NodeStyle) -> &mut AttributeBuilder<NodeContext, LC, OC> {
         self.attributes.push(Attribute::Style(style.into()));
         self
     }
@@ -447,7 +463,7 @@ impl<OC> AttributeBuilder<EdgeContext, NeatoLayout, OC>
 where
     OC: OutputContext,
 {
-    fn len(&mut self, length: f64) -> &mut AttributeBuilder<EdgeContext, NeatoLayout, OC> {
+    pub fn len(&mut self, length: f64) -> &mut AttributeBuilder<EdgeContext, NeatoLayout, OC> {
         self.attributes.push(Attribute::Length(length));
         self
     }

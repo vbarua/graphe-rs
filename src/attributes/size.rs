@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-pub(crate) struct Size {
+pub struct Size {
     width: f64,
     height: f64,
 }

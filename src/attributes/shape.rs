@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-pub(crate) enum Shape {
+pub enum Shape {
     Box,
     Circle,
     Diamond,

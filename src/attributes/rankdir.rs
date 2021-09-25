@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-pub(crate) enum RankDir {
+pub enum RankDir {
     TopBottom,
     LeftRight,
     BottomTop,
