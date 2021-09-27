@@ -28,7 +28,7 @@ fn number(n: i64) -> Expr {
 
 struct Builder {
     builder: GraphBuilder<DirectedGraph, DotLayout, UnspecifiedOutput>,
-    id_tracker: i64,
+    id_tracker: u64,
 }
 
 impl Builder {
@@ -42,7 +42,7 @@ impl Builder {
         }
     }
 
-    fn next_id(&mut self) -> i64 {
+    fn next_id(&mut self) -> u64 {
         self.id_tracker += 1;
         self.id_tracker
     }
@@ -51,11 +51,11 @@ impl Builder {
         self.builder.build()
     }
 
-    fn visit_expr(&mut self, expr: &Expr, parent_id: Option<i64>) {
+    fn visit_expr(&mut self, expr: &Expr, parent_id: Option<u64>) {
         let entry_id = self.next_id();
         match expr {
             Expr::Number(n) => {
-                self.builder.node(entry_id.to_string().as_str(), |ab| {
+                self.builder.node(entry_id, |ab| {
                     ab.label(n.to_string().as_str())
                         .shape(Shape::Circle)
                         .style(NodeStyle::Filled)
@@ -63,31 +63,27 @@ impl Builder {
                 });
                 if let Some(id) = parent_id {
                     self.builder
-                        .edge(entry_id.to_string().as_str(), &id.to_string(), |ab| {
-                            ab.style(EdgeStyle::Dotted)
-                        });
+                        .edge(entry_id, id, |ab| ab.style(EdgeStyle::Dotted));
                 }
             }
             Expr::Add(l, r) => {
                 let entry_id = self.next_id();
-                self.builder.node(entry_id.to_string().as_str(), |ab| {
+                self.builder.node(entry_id, |ab| {
                     ab.label("+").color(Color::Blue).shape(Shape::Box)
                 });
                 if let Some(id) = parent_id {
-                    self.builder
-                        .edge_(entry_id.to_string().as_str(), &id.to_string());
+                    self.builder.edge_(entry_id, id);
                 }
                 self.visit_expr(l, Some(entry_id));
                 self.visit_expr(r, Some(entry_id));
             }
             Expr::Sub(l, r) => {
                 let entry_id = self.next_id();
-                self.builder.node(entry_id.to_string().as_str(), |ab| {
+                self.builder.node(entry_id, |ab| {
                     ab.label("-").color(Color::Red).shape(Shape::Diamond)
                 });
                 if let Some(id) = parent_id {
-                    self.builder
-                        .edge_(entry_id.to_string().as_str(), &id.to_string());
+                    self.builder.edge_(entry_id, id);
                 }
                 self.visit_expr(l, Some(entry_id));
                 self.visit_expr(r, Some(entry_id));

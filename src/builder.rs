@@ -150,7 +150,7 @@ where
         self
     }
 
-    pub fn node<F>(&mut self, id: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn node<T: ToId, F>(&mut self, id: T, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<NodeContext, LC, OC>,
@@ -159,21 +159,21 @@ where
         let mut attribute_builder: AttributeBuilder<NodeContext, LC, OC> = AttributeBuilder::new();
         f(&mut attribute_builder);
         self.statements.push(Statement::Node {
-            id: id.to_string(),
+            id: id.to_id(),
             attributes: attribute_builder.build(),
         });
         self
     }
 
-    pub fn node_(&mut self, id: &str) -> &mut GraphBuilder<GT, LC, OC> {
+    pub fn node_<T: ToId>(&mut self, id: T) -> &mut GraphBuilder<GT, LC, OC> {
         self.statements.push(Statement::Node {
-            id: id.to_string(),
+            id: id.to_id(),
             attributes: Vec::new(),
         });
         self
     }
 
-    pub fn edge<F>(&mut self, from: &str, to: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn edge<T: ToId, F>(&mut self, from: T, to: T, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<EdgeContext, LC, OC>,
@@ -182,23 +182,23 @@ where
         let mut attribute_builder: AttributeBuilder<EdgeContext, LC, OC> = AttributeBuilder::new();
         f(&mut attribute_builder);
         self.statements.push(Statement::Edge {
-            from: from.to_string(),
-            to: to.to_string(),
+            from: from.to_id(),
+            to: to.to_id(),
             attributes: attribute_builder.build(),
         });
         self
     }
 
-    pub fn edge_(&mut self, from: &str, to: &str) -> &mut GraphBuilder<GT, LC, OC> {
+    pub fn edge_<T: ToId>(&mut self, from: T, to: T) -> &mut GraphBuilder<GT, LC, OC> {
         self.statements.push(Statement::Edge {
-            from: from.to_string(),
-            to: to.to_string(),
+            from: from.to_id(),
+            to: to.to_id(),
             attributes: Vec::new(),
         });
         self
     }
 
-    pub fn cluster<F>(&mut self, id: &str, f: F) -> &mut GraphBuilder<GT, LC, OC>
+    pub fn cluster<T: ToId, F>(&mut self, id: T, f: F) -> &mut GraphBuilder<GT, LC, OC>
     where
         F: FnOnce(&mut StatementBuilder<LC, OC>) -> &mut StatementBuilder<LC, OC>,
     {
@@ -206,7 +206,7 @@ where
         f(&mut statement_builder);
 
         self.statements.push(Statement::Subgraph {
-            id: Some(format!("cluster_{}", id)),
+            id: Some(Id(format!("cluster_{}", id.to_id().get()))),
             statements: statement_builder.build(),
         });
         self
@@ -314,7 +314,7 @@ where
         self
     }
 
-    pub fn node<F>(&mut self, id: &str, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn node<T: ToId, F>(&mut self, id: T, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<NodeContext, LC, OC>,
@@ -323,13 +323,13 @@ where
         let mut attribute_builder: AttributeBuilder<NodeContext, LC, OC> = AttributeBuilder::new();
         f(&mut attribute_builder);
         self.statements.push(Statement::Node {
-            id: id.to_string(),
+            id: id.to_id(),
             attributes: attribute_builder.build(),
         });
         self
     }
 
-    pub fn edge<F>(&mut self, from: &str, to: &str, f: F) -> &mut StatementBuilder<LC, OC>
+    pub fn edge<T: ToId, F>(&mut self, from: T, to: T, f: F) -> &mut StatementBuilder<LC, OC>
     where
         F: FnOnce(
             &mut AttributeBuilder<EdgeContext, LC, OC>,
@@ -338,17 +338,17 @@ where
         let mut attribute_builder: AttributeBuilder<EdgeContext, LC, OC> = AttributeBuilder::new();
         f(&mut attribute_builder);
         self.statements.push(Statement::Edge {
-            from: from.to_string(),
-            to: to.to_string(),
+            from: from.to_id(),
+            to: to.to_id(),
             attributes: attribute_builder.build(),
         });
         self
     }
 
-    pub fn edge_(&mut self, from: &str, to: &str) -> &mut StatementBuilder<LC, OC> {
+    pub fn edge_<T: ToId>(&mut self, from: T, to: T) -> &mut StatementBuilder<LC, OC> {
         self.statements.push(Statement::Edge {
-            from: from.to_string(),
-            to: to.to_string(),
+            from: from.to_id(),
+            to: to.to_id(),
             attributes: Vec::new(),
         });
         self

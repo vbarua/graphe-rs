@@ -91,7 +91,7 @@ impl<W: io::Write> AstVisitor<io::Result<()>> for Printer<W> {
             }
             Statement::Node { id, attributes } => {
                 self.indent()?;
-                write!(self.writer, "\"{}\"", id)?;
+                write!(self.writer, "\"{}\"", id.get())?;
                 self.visit_attributes(attributes)?;
                 self.writer.write_all(b";\n")?;
             }
@@ -101,7 +101,7 @@ impl<W: io::Write> AstVisitor<io::Result<()>> for Printer<W> {
                 attributes,
             } => {
                 self.indent()?;
-                self.arrow(from, to)?;
+                self.arrow(from.get(), to.get())?;
                 self.visit_attributes(attributes)?;
                 self.writer.write_all(b";\n")?;
             }
@@ -109,7 +109,7 @@ impl<W: io::Write> AstVisitor<io::Result<()>> for Printer<W> {
                 self.indent()?;
                 self.writer.write_all(b"subgraph")?;
                 if let Some(id) = id {
-                    write!(self.writer, " {}", id)?;
+                    write!(self.writer, " {}", id.get())?;
                 }
                 self.writer.write_all(b" {\n")?;
                 self.depth += 1;
