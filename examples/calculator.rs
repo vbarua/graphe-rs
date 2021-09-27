@@ -56,7 +56,7 @@ impl Builder {
         match expr {
             Expr::Number(n) => {
                 self.builder.node(entry_id, |ab| {
-                    ab.label(n.to_string().as_str())
+                    ab.label(n)
                         .shape(Shape::Circle)
                         .style(NodeStyle::Filled)
                         .color(Color::LightGrey)

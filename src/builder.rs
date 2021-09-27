@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::ast;
 use crate::ast::*;
-use crate::attributes::{ClusterStyle, Color, EdgeStyle, NodeStyle, RankDir, Shape, Size};
+use crate::attributes::{ClusterStyle, Color, EdgeStyle, NodeStyle, RankDir, Shape, Size, ToLabel};
 
 pub struct DirectedGraph;
 pub struct UndirectedGraph;
@@ -381,8 +381,8 @@ where
         self.attributes
     }
 
-    pub fn label(&mut self, label: &str) -> &mut AttributeBuilder<EC, LC, OC> {
-        self.attributes.push(Attribute::Label(label.to_string()));
+    pub fn label<T: ToLabel>(&mut self, label: T) -> &mut AttributeBuilder<EC, LC, OC> {
+        self.attributes.push(Attribute::Label(label.to_label()));
         self
     }
 }

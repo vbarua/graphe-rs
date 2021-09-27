@@ -1,4 +1,4 @@
-use crate::attributes::{Color, RankDir, Shape, Size, Style};
+use crate::attributes::{Color, Label, RankDir, Shape, Size, Style};
 
 pub(crate) enum GraphType {
     Directed,
@@ -89,7 +89,7 @@ impl ToId for &str {
 
 pub(crate) enum Attribute {
     Color(Color),
-    Label(String),
+    Label(Label),
     Length(f64),
     RankDir(RankDir),
     Style(Style),
